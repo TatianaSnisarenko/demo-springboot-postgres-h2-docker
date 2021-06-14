@@ -25,6 +25,9 @@ gradlew/*
 gradlew.bat
 gradle/*
 build/*
+.mvn/wrapper
+mvnw
+mvnw.cmd
 
 
 ### NetBeans ###
