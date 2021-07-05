@@ -13,10 +13,14 @@ import javax.validation.ConstraintViolationException;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class MessageService {
-    @Autowired
+
     private final MessageRepository messageRepository;
+
+    @Autowired
+    public MessageService(MessageRepository messageRepository) {
+        this.messageRepository = messageRepository;
+    }
 
     public Message createMessage(Message message) {
         try {
