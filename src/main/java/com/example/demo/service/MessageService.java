@@ -1,19 +1,18 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.Message;
-import com.example.demo.exception.NoSuchIndexInDataBaseException;
-import com.example.demo.exception.NullFieldsException;
+import com.example.demo.exception.MessageDataBaseException;
 import com.example.demo.repository.MessageRepository;
-import java.util.Collections;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
-import javax.validation.ConstraintViolationException;
-import java.util.List;
-
 @Service
+@Slf4j
 public class MessageService {
 
     private final MessageRepository messageRepository;
@@ -23,48 +22,35 @@ public class MessageService {
         this.messageRepository = messageRepository;
     }
 
-    public Message createMessage(Message message) {
+    public Message createOrUpdateMessage(Message message) {
         try {
             return messageRepository.save(message);
-        } catch (ConstraintViolationException e) {
-            throw new NullFieldsException("One or more fields are null");
+        } catch (Exception e) {
+            log.error(String.format("createMessage. exception saving message title=%s, body=%s", message.getTitle(),
+                    message.getBody()), e);
+            throw new MessageDataBaseException(
+                    String.format("Message wasn't saved into database: title=%s, body=%s", message.getTitle(),
+                            message.getBody()));
         }
     }
 
     public List<Message> findAll() {
-        List<Message> all = messageRepository.findAll();
-        Collections.sort(all);
-        return all;
+        return messageRepository.findAllSorted();
     }
 
-    public Message findById(Integer id) {
-        return messageRepository.findById(id).orElse(null);
+    public Optional findById(Integer id) {
+        return messageRepository.findById(id);
     }
 
     public void deleteById(Integer id) {
         try {
             messageRepository.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
-            throw new NoSuchIndexInDataBaseException("No such index in database");
+            throw new NoSuchElementException("No such index in database");
         }
     }
 
     public void delete(Message message) {
         messageRepository.delete(message);
-    }
-
-    public Message update(Integer id, Message newMessage) {
-        Message messageToUpdate = findById(id);
-        if (messageToUpdate != null) {
-            messageToUpdate.setId(id);
-            messageToUpdate.setTitle(newMessage.getTitle());
-            messageToUpdate.setBody(newMessage.getBody());
-            try {
-                return messageRepository.save(messageToUpdate);
-            } catch (Exception e) {
-                throw new NullFieldsException("One or more fields are null");
-            }
-        }
-        return findById(id);
     }
 }

@@ -1,5 +1,3 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-         pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
@@ -35,15 +33,13 @@
     <div class="card">
         <div class="card-body">
 
-            <form action="messages" method="post">
+            <form action="<%=request.getContextPath()%>/messages" method="post">
 
                 <caption>
                     <h2>
-                        Update Message
+                        Add New Message
                     </h2>
                 </caption>
-
-                <input type="hidden" name="id" value="<c:out value='${message.id}' />"/>
 
                 <fieldset class="form-group">
                     <label>Message Title Name</label> <input type="text"

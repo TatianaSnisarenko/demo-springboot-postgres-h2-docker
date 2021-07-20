@@ -1,9 +1,16 @@
 package com.example.demo.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.example.demo.DemoApplication;
 import com.example.demo.entity.Message;
-import com.example.demo.exception.NoSuchIndexInDataBaseException;
-import com.example.demo.exception.NullFieldsException;
+import com.example.demo.exception.MessageDataBaseException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,12 +22,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.jdbc.JdbcTestUtils;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(
@@ -60,19 +61,19 @@ class MessageServiceTest {
     void createMessage_happyPath() {
         Message message = getMessage();
         assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
-        messageService.createMessage(message);
+        messageService.createOrUpdateMessage(message);
         assertEquals(1, JdbcTestUtils.countRowsInTable(jdbc, "message"));
     }
 
     @Test
     void createMessageWithNullFields() {
         Message message = new Message();
-        assertThrows(NullFieldsException.class, () -> messageService.createMessage(message), "One or more fields are null");
+        assertThrows(MessageDataBaseException.class, () -> messageService.createOrUpdateMessage(message), "One or more fields are null");
         message.setTitle("some title");
-        assertThrows(NullFieldsException.class, () -> messageService.createMessage(message), "One or more fields are null");
+        assertThrows(MessageDataBaseException.class, () -> messageService.createOrUpdateMessage(message), "One or more fields are null");
         message.setTitle(null);
         message.setBody("some body");
-        assertThrows(NullFieldsException.class, () -> messageService.createMessage(message), "One or more fields are null");
+        assertThrows(MessageDataBaseException.class, () -> messageService.createOrUpdateMessage(message), "One or more fields are null");
     }
 
     @Test
@@ -81,9 +82,9 @@ class MessageServiceTest {
         Message message2 = getMessage();
         Message message3 = getMessage();
         assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
-        messageService.createMessage(message1);
-        messageService.createMessage(message2);
-        messageService.createMessage(message3);
+        messageService.createOrUpdateMessage(message1);
+        messageService.createOrUpdateMessage(message2);
+        messageService.createOrUpdateMessage(message3);
         assertEquals(3, JdbcTestUtils.countRowsInTable(jdbc, "message"));
         List<Message> allMessages = messageService.findAll();
         assertEquals(3, allMessages.size());
@@ -95,20 +96,21 @@ class MessageServiceTest {
     @Test
     void findById_happyPath() {
         Message message = getMessage();
-        messageService.createMessage(message);
-        assertEquals(message, messageService.findById(1));
+        messageService.createOrUpdateMessage(message);
+        assertEquals(message, messageService.findById(1).get());
     }
 
     @Test
     void findById_WithNotExistingId_shouldReturnNewEmptyMessage() {
-        assertEquals(null, messageService.findById(1000));
+        assertThrows(NoSuchElementException.class, () -> messageService.findById(1000).get(), "No such index in database");
+        assertEquals(false, messageService.findById(1000).isPresent());
     }
 
     @Test
     void deleteById_happyPath() {
         Message message = getMessage();
         assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
-        messageService.createMessage(message);
+        messageService.createOrUpdateMessage(message);
         assertEquals(1, JdbcTestUtils.countRowsInTable(jdbc, "message"));
         messageService.deleteById(1);
         assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
@@ -116,15 +118,15 @@ class MessageServiceTest {
 
     @Test
     void deleveteById_WithNotExistingId() {
-        assertThrows(NoSuchIndexInDataBaseException.class, () -> messageService.deleteById(1000), "No such index in database");
-        assertThrows(NoSuchIndexInDataBaseException.class, () -> messageService.deleteById(-1), "No such index in database");
+        assertThrows(NoSuchElementException.class, () -> messageService.deleteById(1000), "No such index in database");
+        assertThrows(NoSuchElementException.class, () -> messageService.deleteById(-1), "No such index in database");
     }
 
     @Test
     void delete_happyPath() {
         Message message = getMessage();
         assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
-        messageService.createMessage(message);
+        messageService.createOrUpdateMessage(message);
         assertEquals(1, JdbcTestUtils.countRowsInTable(jdbc, "message"));
         messageService.delete(message);
         assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
@@ -142,10 +144,10 @@ class MessageServiceTest {
     void update_happyPath() {
         Message message = getMessage();
         assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
-        messageService.createMessage(message);
+        messageService.createOrUpdateMessage(message);
         message.setBody("New edited body");
-        messageService.update(1, message);
-        assertEquals(message, messageService.findById(1));
+        messageService.createOrUpdateMessage(message);
+        assertEquals(message, messageService.findById(1).get());
         assertEquals(1, JdbcTestUtils.countRowsInTable(jdbc, "message"));
     }
 
@@ -153,21 +155,21 @@ class MessageServiceTest {
     void update_withNoSuchIndex() {
         Message message = getMessage();
         assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
-        messageService.update(-1, message);
-        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
+        messageService.createOrUpdateMessage(message);
+        assertEquals(1, JdbcTestUtils.countRowsInTable(jdbc, "message"));
     }
 
     @Test
     void update_withNullFields() {
         Message message = getMessage();
         Message messageToUpdate = new Message();
-        messageService.createMessage(message);
-        assertThrows(NullFieldsException.class, () -> messageService.update(1, messageToUpdate), "One or more fields are null");
+        messageService.createOrUpdateMessage(message);
+        assertThrows(MessageDataBaseException.class, () -> messageService.createOrUpdateMessage(messageToUpdate));
         messageToUpdate.setTitle("some title");
-        assertThrows(NullFieldsException.class, () -> messageService.update(1, messageToUpdate), "One or more fields are null");
+        assertThrows(MessageDataBaseException.class, () -> messageService.createOrUpdateMessage(messageToUpdate));
         messageToUpdate.setTitle(null);
         messageToUpdate.setBody("some body");
-        assertThrows(NullFieldsException.class, () -> messageService.update(1, messageToUpdate), "One or more fields are null");
+        assertThrows(MessageDataBaseException.class, () -> messageService.createOrUpdateMessage( messageToUpdate));
     }
 
     private Message getMessage() {

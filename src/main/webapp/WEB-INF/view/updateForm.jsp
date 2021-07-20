@@ -1,5 +1,3 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-         pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
@@ -24,7 +22,7 @@
         </ul>
 
         <ul class="navbar-nav">
-            <li><a href="/new"
+            <li><a href="/messages/form/add"
                    class="nav-link">Add message</a></li>
         </ul>
 
@@ -35,22 +33,26 @@
     <div class="card">
         <div class="card-body">
 
-            <form action="messages" method="post">
+            <form action="<%=request.getContextPath()%>/messages" method="post">
 
                 <caption>
                     <h2>
-                        Add New Message
+                        Update Message
                     </h2>
                 </caption>
 
+                <input type="hidden" name="id" value="<c:out value='${message.id}' />"/>
+
                 <fieldset class="form-group">
-                    <label>Message Title Name</label> <input type="text"
-                                                       class="form-control"
-                                                       name="title" required="required">
+                    <label>Message Title</label> <input type="text"
+                                                        value="<c:out value='${message.title}' />"
+                                                        class="form-control"
+                                                        name="title" required="required">
                 </fieldset>
 
                 <fieldset class="form-group">
                     <label>Message Body</label> <input type="text"
+                                                       value="<c:out value='${message.body}' />"
                                                        class="form-control"
                                                        name="body" required="required">
                 </fieldset>

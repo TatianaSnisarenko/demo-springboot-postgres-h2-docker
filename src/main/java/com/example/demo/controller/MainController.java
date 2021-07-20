@@ -2,11 +2,11 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.Message;
 import com.example.demo.service.MessageService;
-import java.util.Collections;
+import java.util.NoSuchElementException;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
-
+@Slf4j
 @Controller
 @AllArgsConstructor
 @RequestMapping("/")
@@ -22,7 +22,7 @@ public class MainController {
 
     private final MessageService messageService;
 
-
+    @GetMapping()
     public String index() {
         return "index";
     }
@@ -33,31 +33,31 @@ public class MainController {
         return "messages";
     }
 
-    @GetMapping(path = "new")
+    @GetMapping(path = "messages/form/add")
     public String showAddForm() {
-        return "new";
+        return "addForm";
     }
 
     @PostMapping(path = "messages")
     public RedirectView addNewMessage(@ModelAttribute("message") Message message) {
-        messageService.createMessage(message);
+        messageService.createOrUpdateMessage(message);
         return new RedirectView("/messages");
     }
 
-   /* @GetMapping(path = "update")
-    public String showUpdateForm(@RequestParam(name="id") Integer id, Model model) {
-        model.addAttribute(messageService.findById(id));
-        return "update";
+    @GetMapping(path = "messages/form/update")
+    public String showUpdateForm(@RequestParam(name = "id") Integer id, Model model) {
+
+        try {
+            model.addAttribute(messageService.findById(id)
+                    .orElseThrow(() -> new NoSuchElementException("No such index in database")));
+        } catch (Throwable throwable) {
+            log.error("showUpdateForm . ", throwable.getMessage());
+        }
+        return "updateForm";
     }
 
-    @PostMapping(path = "messages")
-    public RedirectView updateMessage(@ModelAttribute("message") Message message) {
-        messageService.update(message.getId(), message);
-        return new RedirectView("/messages");
-    }*/
-
-    @DeleteMapping(path = "messages")
-    public RedirectView deleteMessage(@RequestParam(name="id") Integer id) {
+    @GetMapping(path = "messages/delete")
+    public RedirectView deleteMessage(@RequestParam(name = "id") Integer id) {
         messageService.deleteById(id);
         return new RedirectView("/messages");
     }

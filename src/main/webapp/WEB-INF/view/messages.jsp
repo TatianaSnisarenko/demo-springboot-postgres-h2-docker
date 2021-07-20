@@ -1,5 +1,3 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-         pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
@@ -24,7 +22,7 @@
         </ul>
 
         <ul class="navbar-nav">
-            <li><a href="/new"
+            <li><a href="/messages/form/add"
                    class="nav-link">Add message</a></li>
         </ul>
 
@@ -53,13 +51,14 @@
             <!--   for (Todo todo: todos) {  -->
             <c:forEach var="message" items="${messages}">
                 <tr>
-                    <td><c:out value="${message.id}" /></td>
-                    <td><c:out value="${message.title}" /></td>
-                    <td><c:out value="${message.body}" /></td>
+                    <td><c:out value="${message.id}"/></td>
+                    <td><c:out value="${message.title}"/></td>
+                    <td><c:out value="${message.body}"/></td>
 
-                    <td><a href="<%=request.getContextPath()%>/update?id=<c:out value='${message.id}' />">Edit</a>
+                    <td><a href="<%=request.getContextPath()%>/messages/form/update?id=<c:out value='${message.id}' />">Edit</a>
                         &nbsp;&nbsp;&nbsp;&nbsp; <a
-                                href="<%=request.getContextPath()%>/delete?id=<c:out value='${message.id}' />">Delete</a></td>
+                                href="<%=request.getContextPath()%>/messages/delete?id=<c:out value='${message.id}' />">Delete</a>
+                    </td>
                 </tr>
             </c:forEach>
             <!-- } -->
