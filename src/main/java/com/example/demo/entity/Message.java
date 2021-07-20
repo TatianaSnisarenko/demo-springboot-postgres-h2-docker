@@ -6,13 +6,13 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 
 @Entity
-@Table(name = "messages")
+@Table(name = "message")
 @Data
-public class Message {
+public class Message implements Comparable<Message>{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @Column(nullable = false)
     @NotBlank(message = "Title is mandatory")
@@ -22,4 +22,9 @@ public class Message {
     @NotBlank(message = "Message body is mandatory")
     private String body;
 
+
+    @Override
+    public int compareTo(Message o) {
+        return Integer.compare(this.getId(), o.getId());
+    }
 }

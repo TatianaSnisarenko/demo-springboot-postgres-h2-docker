@@ -3,17 +3,31 @@ services:
   app:
     container_name: springboot-postgresql
     image: 'springboot-postgresql'
-    build: ./
-    ports:
-      - '8080:8080'
     depends_on:
-      - localhost
-
-  localhost:
-    image: postgres
+      - pg13
     ports:
-      - "5432:5432"
+      - '8085:8085'
+    network_mode: host
+
+  pg13:
+    container_name: pg13
+    image: 'postgres:13.3-alpine'
+    healthcheck:
+      test: ["CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
     environment:
-      - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
-      - POSTGRES_DB=messages
+      - POSTGRES_PASSWORD=postgres
+      - APP_DB_USER=message
+      - APP_DB_PASS=12345
+      - APP_DB_NAME=message
+    volumes:
+    - ./db:/docker-entrypoint-initdb.d/
+    ports:
+    - 5432:5432
+
+
+

@@ -59,9 +59,9 @@ class MessageServiceTest {
     @Test
     void createMessage_happyPath() {
         Message message = getMessage();
-        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "messages"));
+        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
         messageService.createMessage(message);
-        assertEquals(1, JdbcTestUtils.countRowsInTable(jdbc, "messages"));
+        assertEquals(1, JdbcTestUtils.countRowsInTable(jdbc, "message"));
     }
 
     @Test
@@ -80,11 +80,11 @@ class MessageServiceTest {
         Message message1 = getMessage();
         Message message2 = getMessage();
         Message message3 = getMessage();
-        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "messages"));
+        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
         messageService.createMessage(message1);
         messageService.createMessage(message2);
         messageService.createMessage(message3);
-        assertEquals(3, JdbcTestUtils.countRowsInTable(jdbc, "messages"));
+        assertEquals(3, JdbcTestUtils.countRowsInTable(jdbc, "message"));
         List<Message> allMessages = messageService.findAll();
         assertEquals(3, allMessages.size());
         assertTrue(allMessages.contains(message1));
@@ -96,65 +96,65 @@ class MessageServiceTest {
     void findById_happyPath() {
         Message message = getMessage();
         messageService.createMessage(message);
-        assertEquals(message, messageService.findById(1L));
+        assertEquals(message, messageService.findById(1));
     }
 
     @Test
     void findById_WithNotExistingId_shouldReturnNewEmptyMessage() {
-        assertEquals(null, messageService.findById(1000L));
+        assertEquals(null, messageService.findById(1000));
     }
 
     @Test
     void deleteById_happyPath() {
         Message message = getMessage();
-        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "messages"));
+        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
         messageService.createMessage(message);
-        assertEquals(1, JdbcTestUtils.countRowsInTable(jdbc, "messages"));
-        messageService.deleteById(1L);
-        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "messages"));
+        assertEquals(1, JdbcTestUtils.countRowsInTable(jdbc, "message"));
+        messageService.deleteById(1);
+        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
     }
 
     @Test
     void deleveteById_WithNotExistingId() {
-        assertThrows(NoSuchIndexInDataBaseException.class, () -> messageService.deleteById(1000L), "No such index in database");
-        assertThrows(NoSuchIndexInDataBaseException.class, () -> messageService.deleteById(-1L), "No such index in database");
+        assertThrows(NoSuchIndexInDataBaseException.class, () -> messageService.deleteById(1000), "No such index in database");
+        assertThrows(NoSuchIndexInDataBaseException.class, () -> messageService.deleteById(-1), "No such index in database");
     }
 
     @Test
     void delete_happyPath() {
         Message message = getMessage();
-        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "messages"));
+        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
         messageService.createMessage(message);
-        assertEquals(1, JdbcTestUtils.countRowsInTable(jdbc, "messages"));
+        assertEquals(1, JdbcTestUtils.countRowsInTable(jdbc, "message"));
         messageService.delete(message);
-        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "messages"));
+        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
     }
 
     @Test
     void delete_withNotExistingMessage() {
         Message message = getMessage();
-        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "messages"));
+        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
         messageService.delete(message);
-        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "messages"));
+        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
     }
 
     @Test
     void update_happyPath() {
         Message message = getMessage();
-        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "messages"));
+        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
         messageService.createMessage(message);
         message.setBody("New edited body");
-        messageService.update(1L, message);
-        assertEquals(message, messageService.findById(1L));
-        assertEquals(1, JdbcTestUtils.countRowsInTable(jdbc, "messages"));
+        messageService.update(1, message);
+        assertEquals(message, messageService.findById(1));
+        assertEquals(1, JdbcTestUtils.countRowsInTable(jdbc, "message"));
     }
 
     @Test
     void update_withNoSuchIndex() {
         Message message = getMessage();
-        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "messages"));
-        messageService.update(-1L, message);
-        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "messages"));
+        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
+        messageService.update(-1, message);
+        assertEquals(0, JdbcTestUtils.countRowsInTable(jdbc, "message"));
     }
 
     @Test
@@ -162,12 +162,12 @@ class MessageServiceTest {
         Message message = getMessage();
         Message messageToUpdate = new Message();
         messageService.createMessage(message);
-        assertThrows(NullFieldsException.class, () -> messageService.update(1L, messageToUpdate), "One or more fields are null");
+        assertThrows(NullFieldsException.class, () -> messageService.update(1, messageToUpdate), "One or more fields are null");
         messageToUpdate.setTitle("some title");
-        assertThrows(NullFieldsException.class, () -> messageService.update(1L, messageToUpdate), "One or more fields are null");
+        assertThrows(NullFieldsException.class, () -> messageService.update(1, messageToUpdate), "One or more fields are null");
         messageToUpdate.setTitle(null);
         messageToUpdate.setBody("some body");
-        assertThrows(NullFieldsException.class, () -> messageService.update(1L, messageToUpdate), "One or more fields are null");
+        assertThrows(NullFieldsException.class, () -> messageService.update(1, messageToUpdate), "One or more fields are null");
     }
 
     private Message getMessage() {

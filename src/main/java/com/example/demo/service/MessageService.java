@@ -4,6 +4,7 @@ import com.example.demo.entity.Message;
 import com.example.demo.exception.NoSuchIndexInDataBaseException;
 import com.example.demo.exception.NullFieldsException;
 import com.example.demo.repository.MessageRepository;
+import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -27,14 +28,16 @@ public class MessageService {
     }
 
     public List<Message> findAll() {
-        return messageRepository.findAll();
+        List<Message> all = messageRepository.findAll();
+        Collections.sort(all);
+        return all;
     }
 
-    public Message findById(Long id) {
+    public Message findById(Integer id) {
         return messageRepository.findById(id).orElse(null);
     }
 
-    public void deleteById(Long id) {
+    public void deleteById(Integer id) {
         try {
             messageRepository.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
@@ -46,7 +49,7 @@ public class MessageService {
         messageRepository.delete(message);
     }
 
-    public Message update(Long id, Message newMessage) {
+    public Message update(Integer id, Message newMessage) {
         Message messageToUpdate = findById(id);
         if (messageToUpdate != null) {
             messageToUpdate.setId(id);

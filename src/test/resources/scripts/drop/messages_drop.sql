@@ -1,1 +1,1 @@
-drop table messages;
+drop table message;

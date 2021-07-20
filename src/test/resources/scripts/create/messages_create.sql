@@ -1,4 +1,4 @@
-create table if not exists messages
+create table if not exists message
 (
     id int
 (
