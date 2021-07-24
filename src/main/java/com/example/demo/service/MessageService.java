@@ -26,7 +26,7 @@ public class MessageService {
         try {
             return messageRepository.save(message);
         } catch (Exception e) {
-            log.error(String.format("createMessage. exception saving message title=%s, body=%s", message.getTitle(),
+            log.error(String.format("createOrUpdateMessage . exception saving message title=%s, body=%s", message.getTitle(),
                     message.getBody()), e);
             throw new MessageDataBaseException(
                     String.format("Message wasn't saved into database: title=%s, body=%s", message.getTitle(),
@@ -35,14 +35,17 @@ public class MessageService {
     }
 
     public List<Message> findAll() {
+        log.info("findAll .");
         return messageRepository.findAllSorted();
     }
 
     public Optional findById(Integer id) {
+        log.info("findById .");
         return messageRepository.findById(id);
     }
 
     public void deleteById(Integer id) {
+        log.info("deleteById .");
         try {
             messageRepository.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
@@ -51,6 +54,7 @@ public class MessageService {
     }
 
     public void delete(Message message) {
+        log.info("delete .");
         messageRepository.delete(message);
     }
 }

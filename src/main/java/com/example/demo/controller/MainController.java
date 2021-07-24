@@ -5,8 +5,6 @@ import com.example.demo.service.MessageService;
 import java.util.NoSuchElementException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,51 +20,49 @@ import org.springframework.web.servlet.view.RedirectView;
 @RequestMapping("/")
 public class MainController {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(MainController.class);
-
     private final MessageService messageService;
 
     @GetMapping()
     public String index() {
-        LOGGER.info("index .");
+        log.info("index .");
         return "index";
     }
 
     @GetMapping(path = "messages")
     public String viewListOfMessages(Model model) {
-        LOGGER.info("viewListOfMessages .");
+        log.info("viewListOfMessages .");
         model.addAttribute("messages", messageService.findAll());
         return "messages";
     }
 
     @GetMapping(path = "messages/form/add")
     public String showAddForm() throws Exception {
-        LOGGER.debug("showAddForm .");
+        log.debug("showAddForm .");
         return "addForm";
     }
 
     @PostMapping(path = "messages")
     public RedirectView addNewMessage(@ModelAttribute("message") Message message) {
-        LOGGER.debug("addNewMessage .");
+        log.debug("addNewMessage .");
         messageService.createOrUpdateMessage(message);
         return new RedirectView("/messages");
     }
 
     @GetMapping(path = "messages/form/update")
     public String showUpdateForm(@RequestParam(name = "id") Integer id, Model model) {
-        LOGGER.info("showUpdateForm .");
+        log.info("showUpdateForm .");
         try {
             model.addAttribute(messageService.findById(id)
                     .orElseThrow(() -> new NoSuchElementException("No such index in database")));
         } catch (Throwable throwable) {
-            LOGGER.error("showUpdateForm . ", throwable.getMessage());
+            log.error("showUpdateForm . ", throwable.getMessage());
         }
         return "updateForm";
     }
 
     @GetMapping(path = "messages/delete")
     public RedirectView deleteMessage(@RequestParam(name = "id") Integer id) {
-        LOGGER.info("deleteMessage .");
+        log.info("deleteMessage .");
         messageService.deleteById(id);
         return new RedirectView("/messages");
     }
