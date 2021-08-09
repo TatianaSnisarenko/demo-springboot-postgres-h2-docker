@@ -19,26 +19,25 @@ public class MyErrorController implements ErrorController  {
     @RequestMapping("/error")
     public ModelAndView renderErrorPage(HttpServletRequest request) {
         Throwable exception =(Throwable) request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
-        LOGGER.error("An error happened", exception);
+        log.error("An error happened", exception);
         ModelAndView errorPage = new ModelAndView("error");
         String errorMsg = " Please, check your request and try again later";
-        int httpErrorCode = Integer.valueOf(request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE).toString());
+        int httpErrorCode = Integer.parseInt(request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE).toString());
 
         switch (httpErrorCode) {
-            case 400: {
-                errorMsg = "Http Error Code: 400. Bad Request." + errorMsg;
+            case 401:
+            case 403:{
+                errorMsg = "\nYou are not athorized to seeing this page." +
+                        "\nPlease use another credentials or choose other page";
                 break;
             }
-            case 401: {
-                errorMsg = "Http Error Code: 401. Unauthorized." + errorMsg;
-                break;
-            }
+            case 400:
             case 404: {
-                errorMsg = "Http Error Code: 404. Resource not found." + errorMsg;
+                errorMsg = "\nThere is no such page.\n" + errorMsg;
                 break;
             }
             case 500: {
-                errorMsg = "Http Error Code: 500. Internal Server Error." + errorMsg;
+                errorMsg = "\nInternal Server Error.\n" + errorMsg;
                 break;
             }
             default:{

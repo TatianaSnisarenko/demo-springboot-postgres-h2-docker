@@ -8,6 +8,9 @@ services:
     ports:
       - '8085:8085'
     network_mode: host
+    environment:
+      -sever.port: 8085
+      -server.address: 0.0.0.0
 
   pg13:
     container_name: pg13
